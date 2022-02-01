@@ -1,5 +1,6 @@
 use crate::{
     gfa::{Line, Link, Path, Segment},
+    optfields::OptField,
     parser::GFAParser,
 };
 
@@ -18,7 +19,7 @@ pub struct MmapGFA {
     pub line_buf: Vec<u8>,
     pub current_line_len: usize,
     pub last_buf_offset: usize,
-    pub parser: GFAParser<usize, ()>,
+    pub parser: GFAParser<usize, Vec<OptField>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,11 +39,11 @@ pub struct LineIndices {
 #[derive(Debug)]
 pub struct SegmentIter<'a> {
     mmap: &'a mut MmapGFA,
-    parser: GFAParser<usize, ()>,
+    parser: GFAParser<usize, Vec<OptField>>,
 }
 
 impl<'a> Iterator for SegmentIter<'a> {
-    type Item = Segment<usize, ()>;
+    type Item = Segment<usize, Vec<OptField>>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -62,11 +63,11 @@ impl<'a> Iterator for SegmentIter<'a> {
 #[derive(Debug)]
 pub struct LinkIter<'a> {
     mmap: &'a mut MmapGFA,
-    parser: GFAParser<usize, ()>,
+    parser: GFAParser<usize, Vec<OptField>>,
 }
 
 impl<'a> Iterator for LinkIter<'a> {
-    type Item = Link<usize, ()>;
+    type Item = Link<usize, Vec<OptField>>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -86,11 +87,11 @@ impl<'a> Iterator for LinkIter<'a> {
 #[derive(Debug)]
 pub struct PathIter<'a> {
     mmap: &'a mut MmapGFA,
-    parser: GFAParser<usize, ()>,
+    parser: GFAParser<usize, Vec<OptField>>,
 }
 
 impl<'a> Iterator for PathIter<'a> {
-    type Item = Path<usize, ()>;
+    type Item = Path<usize, Vec<OptField>>;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -143,7 +144,7 @@ impl MmapGFA {
         self.cursor.get_ref().as_ref()
     }
 
-    pub fn get_parser(&self) -> &GFAParser<usize, ()> {
+    pub fn get_parser(&self) -> &GFAParser<usize, Vec<OptField>> {
         &self.parser
     }
 
@@ -225,7 +226,7 @@ impl MmapGFA {
         Some(name)
     }
 
-    pub fn parse_current_line(&self) -> Result<Line<usize, ()>> {
+    pub fn parse_current_line(&self) -> Result<Line<usize, Vec<OptField>>> {
         let line = self.current_line();
         if line.is_empty() {
             bail!("Line at offset {} is empty", self.last_buf_offset);
